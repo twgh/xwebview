@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--炫彩界面库-窗口布局文件-->
+<head />
+<windowUI bkInfoM="{99:1.9.9;98:1(0);5:2(15)20(1)21(3)26(1)22(-7839744)23(255);}" border="3,30,3,3" center="true" content="Go调用WebView2 (Edge内核浏览器组件)" enableLayout="true" rect="20,20,1600,1024" shadowDepth="255" shadowSize="10" showT="true" transparentFlag="shadow" windowStyle="2031">
+	<layoutEleUI expandT="true" layout.alignH="left" layout.horizon="true" layout.width="fill" rect="363,183,100,30" showT="true">
+		<buttonUI content="隐藏" expandT="true" name="按钮_隐藏" rect="321,14,60,25" showT="true" />
+		<editUI content="https://www.baidu.com/" expandT="true" layout.width=":1" name="编辑框_地址栏" rect="165,48,591,25" showT="true" />
+		<buttonUI content="跳转" expandT="true" name="按钮_跳转" rect="604,41,60,25" showT="true" />
+		<buttonUI content="刷新" expandT="true" layout.float="true" name="按钮_刷新" rect="341,34,60,25" showT="true" />
+	</layoutEleUI>
+	<layoutEleUI expandT="true" layout.height="auto" layout.width="fill" rect="356,97,1054,28" showT="true">
+		<buttonUI content="销毁" expandT="true" name="按钮_销毁" rect="638,36,60,25" showT="true" />
+		<buttonUI content="JS测试" expandT="true" name="按钮_JS测试" rect="618,16,60,25" showT="true" />
+		<buttonUI content="执行Go函数" expandT="true" layout.width="auto" name="按钮_执行Go函数" rect="553,3,115,25" showT="true" />
+		<buttonUI content="打开百度" expandT="true" layout.width="auto" name="按钮_打开百度" rect="321,23,86,25" showT="true" />
+		<buttonUI content="设置搜索关键词" expandT="true" name="按钮_设置搜索关键词" rect="95,6,113,25" showT="true" />
+		<buttonUI content="点击搜索" expandT="true" name="按钮_点击搜索" rect="79,26,60,25" showT="true" />
+		<buttonUI content="打开vue-element-admin" expandT="true" layout.width="auto" name="按钮_打开vea" rect="301,3,86,25" showT="true" />
+	</layoutEleUI>
+	<layoutEleUI drawBorder="true" expandT="true" layout.height=":1" layout.margin="2,2,2,2" layout.width="fill" name="布局WV" rect="200,145,794,484" showT="true" />
+</windowUI>

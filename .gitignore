@@ -16,6 +16,7 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+.idea/
 
 # Go workspace file
 go.work
@@ -23,3 +24,4 @@ go.work.sum
 
 # env file
 .env
+/go.sum
