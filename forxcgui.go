@@ -15,9 +15,6 @@ import (
 
 // XcWebViewOption 是给 xcgui 定制的 WebViewOption.
 type XcWebViewOption struct {
-	// 炫彩窗口或元素句柄
-	HParent int
-
 	// WebView2 宿主窗口标题
 	Title string
 	// WebView2 宿主窗口类名
@@ -49,9 +46,11 @@ type XcWebViewOption struct {
 
 // New 创建 webview 窗口到炫彩窗口或元素, 失败返回nil.
 //
-// opt: 选项, opt.HParent 必填.
-func New(opt XcWebViewOption) *WebView {
-	if opt.HParent < 1 {
+// hParent: 炫彩窗口或元素句柄.
+//
+// opt: 选项.
+func New(hParent int, opt XcWebViewOption) *WebView {
+	if hParent < 1 {
 		return nil
 	}
 	w := &WebView{}
@@ -64,7 +63,7 @@ func New(opt XcWebViewOption) *WebView {
 	chromium.SetPermission(edge.CoreWebView2PermissionKindClipboardRead, edge.CoreWebView2PermissionStateAllow)
 
 	w.browser = chromium
-	if !w.createWithOptionsByXcgui(opt) {
+	if !w.createWithOptionsByXcgui(hParent, opt) {
 		return nil
 	}
 
@@ -87,18 +86,18 @@ func New(opt XcWebViewOption) *WebView {
 }
 
 // createWithOptionsByXcgui 创建webview宿主窗口.
-func (w *WebView) createWithOptionsByXcgui(opt XcWebViewOption) bool {
-	w.hParent = opt.HParent
+func (w *WebView) createWithOptionsByXcgui(hParent int, opt XcWebViewOption) bool {
+	w.hParent = hParent
 	// 获取父窗口或元素的HWND
 	var hWnd uintptr
 	var isWindow bool
-	if opt.HParent > 0 {
-		if xc.XC_IsHWINDOW(opt.HParent) {
+	if w.hParent > 0 {
+		if xc.XC_IsHWINDOW(w.hParent) {
 			isWindow = true
-			hWnd = xc.XWnd_GetHWND(opt.HParent)
-		} else if xc.XC_IsHELE(opt.HParent) {
-			hWnd = xc.XWidget_GetHWND(opt.HParent)
-			w.hWindow = xc.XWidget_GetHWINDOW(opt.HParent)
+			hWnd = xc.XWnd_GetHWND(w.hParent)
+		} else if xc.XC_IsHELE(w.hParent) {
+			hWnd = xc.XWidget_GetHWND(w.hParent)
+			w.hWindow = xc.XWidget_GetHWINDOW(w.hParent)
 		}
 	}
 
@@ -121,7 +120,11 @@ func (w *WebView) createWithOptionsByXcgui(opt XcWebViewOption) bool {
 		// load icon from resource
 		icon = wapi.LoadImageW(hInstance, uintptr(opt.IconId), wapi.IMAGE_ICON, 0, 0, wapi.LR_DEFAULTSIZE|wapi.LR_SHARED)
 	}
+
 	// 注册窗口类名
+	if opt.ClassName == "" {
+		opt.ClassName = "XWebview"
+	}
 	wc := wapi.WNDCLASSEX{
 		Style:         wapi.CS_HREDRAW | wapi.CS_VREDRAW,
 		CbSize:        uint32(unsafe.Sizeof(wapi.WNDCLASSEX{})),
@@ -164,9 +167,9 @@ func (w *WebView) createWithOptionsByXcgui(opt XcWebViewOption) bool {
 		}
 		var rc xc.RECT
 		if isWindow {
-			xc.XWnd_GetClientRect(opt.HParent, &rc)
+			xc.XWnd_GetClientRect(w.hParent, &rc)
 		} else {
-			xc.XEle_GetWndClientRect(opt.HParent, &rc)
+			xc.XEle_GetWndClientRect(w.hParent, &rc)
 		}
 		// 填充父
 		if opt.FillParent {
@@ -180,9 +183,9 @@ func (w *WebView) createWithOptionsByXcgui(opt XcWebViewOption) bool {
 		wapi.MoveWindow(w.hwnd, left, top, width, height, false)
 
 		if isWindow {
-			xc.XWnd_AdjustLayout(opt.HParent)
+			xc.XWnd_AdjustLayout(w.hParent)
 		} else {
-			xc.XEle_AdjustLayout(opt.HParent, 0)
+			xc.XEle_AdjustLayout(w.hParent, 0)
 		}
 	}
 
@@ -193,16 +196,16 @@ func (w *WebView) createWithOptionsByXcgui(opt XcWebViewOption) bool {
 	// 元素事件
 	if !isWindow {
 		// 调整位置和大小
-		xc.XEle_RemoveEventC(opt.HParent, xcc.XE_SIZE, onEleSize)
-		xc.XEle_RegEventC1(opt.HParent, xcc.XE_SIZE, onEleSize)
+		xc.XEle_RemoveEventC(w.hParent, xcc.XE_SIZE, onEleSize)
+		xc.XEle_RegEventC1(w.hParent, xcc.XE_SIZE, onEleSize)
 
 		// 跟随父销毁
-		xc.XEle_RemoveEventC(opt.HParent, xcc.XE_DESTROY, onEleDestroy)
-		xc.XEle_RegEventC1(opt.HParent, xcc.XE_DESTROY, onEleDestroy)
+		xc.XEle_RemoveEventC(w.hParent, xcc.XE_DESTROY, onEleDestroy)
+		xc.XEle_RegEventC1(w.hParent, xcc.XE_DESTROY, onEleDestroy)
 
 		// 跟随父显示或隐藏
-		xc.XEle_RemoveEventC(opt.HParent, xcc.XE_SHOW, onEleShow)
-		xc.XEle_RegEventC1(opt.HParent, xcc.XE_SHOW, onEleShow)
+		xc.XEle_RemoveEventC(w.hParent, xcc.XE_SHOW, onEleShow)
+		xc.XEle_RegEventC1(w.hParent, xcc.XE_SHOW, onEleShow)
 	}
 	return true
 }

@@ -234,10 +234,7 @@ func main() {
 }
 
 func createWV(layoutWV *widget.LayoutEle) *xwebview.WebView {
-	wv := xwebview.New(xwebview.XcWebViewOption{
-		HParent:    layoutWV.Handle,
-		Title:      "xc-WebView2",
-		ClassName:  "xc-WebView2类名",
+	wv := xwebview.New(layoutWV.Handle, xwebview.XcWebViewOption{
 		DataPath:   "D:\\cache\\wv",
 		Debug:      true,
 		FillParent: true,
