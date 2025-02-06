@@ -50,7 +50,7 @@ type XcWebViewOption struct {
 //
 // opt: 选项.
 func New(hParent int, opt XcWebViewOption) *WebView {
-	if hParent < 1 {
+	if !xc.XC_IsHELE(hParent) && !xc.XC_IsHWINDOW(hParent) {
 		return nil
 	}
 	w := &WebView{}
@@ -93,6 +93,7 @@ func (w *WebView) createWithOptionsByXcgui(hParent int, opt XcWebViewOption) boo
 	var isWindow bool
 	if w.hParent > 0 {
 		if xc.XC_IsHWINDOW(w.hParent) {
+			w.hWindow = w.hParent
 			isWindow = true
 			hWnd = xc.XWnd_GetHWND(w.hParent)
 		} else if xc.XC_IsHELE(w.hParent) {
@@ -167,7 +168,7 @@ func (w *WebView) createWithOptionsByXcgui(hParent int, opt XcWebViewOption) boo
 		}
 		var rc xc.RECT
 		if isWindow {
-			xc.XWnd_GetClientRect(w.hParent, &rc)
+			xc.XWnd_GetBodyRect(w.hParent, &rc)
 		} else {
 			xc.XEle_GetWndClientRect(w.hParent, &rc)
 		}
@@ -207,6 +208,8 @@ func (w *WebView) createWithOptionsByXcgui(hParent int, opt XcWebViewOption) boo
 		xc.XEle_RemoveEventC(w.hParent, xcc.XE_SHOW, onEleShow)
 		xc.XEle_RegEventC1(w.hParent, xcc.XE_SHOW, onEleShow)
 	}
+
+	w.updateWebviewSize()
 	return true
 }
 

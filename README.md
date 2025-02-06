@@ -18,7 +18,7 @@
 
 # 介绍
 
-给 [xcgui](https://github.com/twgh/xcgui) 使用的 webview2
+给 [xcgui](https://github.com/twgh/xcgui) 使用的 webview2，可创建到炫彩窗口或元素
 
 # 获取
 
@@ -30,3 +30,8 @@ go get -u github.com/twgh/xwebview@latest
 
 [下载](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2?cs=3457492030&form=MA13LH#download-section)
 
+# 预览
+
+![CreateByLayoutEle](https://gitee.com/twgh/xwebview/raw/main/example/CreateByLayoutEle/1.jpg)
+
+![CreateByWindow](https://gitee.com/twgh/xwebview/raw/main/example/CreateByWindow/1.jpg)
