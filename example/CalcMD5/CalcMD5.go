@@ -42,7 +42,6 @@ func (m *MainWindow) main() {
 	m.wv = xwebview.New(m.w.Handle, xwebview.XcWebViewOption{
 		DataPath:   os.TempDir(),
 		FillParent: true,
-		Debug:      true,
 	})
 	// 加载网页
 	url, _ := filepath.Abs("./example/CalcMD5/index.html")
