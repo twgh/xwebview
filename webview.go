@@ -1,6 +1,3 @@
-//go:build windows
-// +build windows
-
 package xwebview
 
 import (
@@ -374,8 +371,8 @@ func (w *WebView) EvalAsync(js string, f func(result interface{}, err error), ti
 }
 
 var (
-	// ErrEvalTimeout 是 EvalAsync 执行 js 代码超时.
-	ErrEvalTimeout = fmt.Errorf("执行超时")
+	// ErrEvalTimeout 是执行 js 代码超时.
+	ErrEvalTimeout = errors.New("执行超时")
 )
 
 // EvalSync 执行 js 代码, 同步取回返回值. 必须在UI线程执行.
@@ -460,7 +457,7 @@ func (w *WebView) EvalSync(js string, timeout ...time.Duration) (interface{}, er
 	return result, err
 }
 
-// Refresh 刷新.
+// Refresh 网页_刷新.
 //
 // forceReload: 是否强制刷新, 默认为false. 为 true 时，浏览器会强制重新加载页面，忽略缓存。这意味着无论页面是否已经在本地缓存中，都会从服务器重新获取资源。
 func (w *WebView) Refresh(forceReload ...bool) *WebView {
@@ -472,14 +469,43 @@ func (w *WebView) Refresh(forceReload ...bool) *WebView {
 	return w
 }
 
-// GoBack 后退.
+// GoBack 网页_后退.
 func (w *WebView) GoBack() *WebView {
 	w.browser.Eval("history.back();")
 	return w
 }
 
-// GoForward 前进.
+// GoForward 网页_前进.
 func (w *WebView) GoForward() *WebView {
 	w.browser.Eval("history.forward();")
 	return w
+}
+
+// Stop 网页_停止加载.
+func (w *WebView) Stop() *WebView {
+	w.browser.Eval("location.href = location.href;")
+	return w
+}
+
+// Reload 网页_重新加载.
+func (w *WebView) Reload() *WebView {
+	w.browser.Eval("location.reload();")
+	return w
+}
+
+// BindLog 绑定一个日志输出函数, 参数不限个数, 在js代码中调用, 会在go控制台中输出.
+//
+// funcName: 自定义函数名, 为空默认为glog.
+func (w *WebView) BindLog(funcName ...string) error {
+	name := "glog"
+	if len(funcName) > 0 {
+		name = funcName[0]
+		// 名字中不能有空格
+		if strings.Contains(name, " ") {
+			return errors.New("funcName 中不能有空格")
+		}
+	}
+	return w.Bind(name, func(msg ...interface{}) {
+		fmt.Printf("%v\n", msg...)
+	})
 }

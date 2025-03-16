@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>MD5计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 自定义标题栏 */
+        #title-bar {
+            height: 32px;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            border-bottom: 1px solid #ddd;
+            user-select: none;
+            -webkit-user-select: none; /* 禁用文本选择 */
+            cursor: pointer;
+        }
+
+        #window-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .window-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 4px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .window-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .window-btn.close:hover {
+            background: #e81123;
+            color: white;
+        }
+
+        /* 主内容区 */
+        .container {
+            flex: 1;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 24px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #filePath {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        #filePath:focus {
+            outline: none;
+            border-color: #0078d4;
+        }
+
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #selectFile {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        #selectFile:hover {
+            background: #e0e0e0;
+        }
+
+        #calcMd5 {
+            background: #0078d4;
+            color: white;
+        }
+
+        #calcMd5:hover {
+            background: #006cbd;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            min-height: 80px;
+            border: 1px solid #eee;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+<!-- 自定义标题栏 -->
+<div id="title-bar">
+    <div>MD5 计算器</div>
+    <div id="window-controls">
+        <button class="window-btn" onclick="minimizeWindow()">−</button>
+        <button class="window-btn" onclick="toggleMaximize()">□</button>
+        <button class="window-btn close" onclick="closeWindow()">×</button>
+    </div>
+</div>
+
+<div class="container">
+    <h1>文件MD5计算器</h1>
+    <div class="input-group">
+        <input type="text" id="filePath" placeholder="请选择文件或输入文件路径">
+        <button id="selectFile" onclick="selectFile()">选择文件</button>
+    </div>
+    <button id="calcMd5" onclick="calculate()">计算MD5</button>
+    <div id="result"></div>
+</div>
+
+<script>
+    let isDragging = false;
+    let offsetX, offsetY;
+    let titlebar = document.getElementById('title-bar');
+
+    // 监听 titlebar 的鼠标按下事件
+    titlebar.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        // 获取鼠标在标题栏内的相对位置
+        offsetX = e.clientX;
+        offsetY = e.clientY;
+    });
+
+    // 监听 titlebar 的鼠标双击事件
+    titlebar.addEventListener('dblclick', () => {
+        toggleMaximize();
+    });
+
+    // 监听鼠标移动事件
+    document.addEventListener('mousemove', async (e) => {
+        if (!isDragging) return;
+        const newX = e.screenX - offsetX;
+        const newY = e.screenY - offsetY;
+        // 调用后端移动窗口
+        moveWindow(newX, newY);
+    });
+
+    // 监听鼠标抬起事件
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    // 禁用右键菜单
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+
+    // 选择文件
+    async function selectFile() {
+        document.getElementById('filePath').value = await goOpenFile();
+    }
+
+    // 计算MD5
+    async function calculate() {
+        const path = document.getElementById('filePath').value;
+        if (path === "") {
+            showError('请先选择文件');
+            return;
+        }
+
+        const btnCalcMd5 = document.getElementById('calcMd5');
+        btnCalcMd5.disabled = true;
+        btnCalcMd5.textContent = '计算中...'
+
+        try {
+            document.getElementById('result').textContent = await calculateMD5(path)
+        } catch (error) {
+            showError(error.message);
+        } finally {
+            btnCalcMd5.disabled = false
+            btnCalcMd5.textContent = '计算MD5'
+        }
+    }
+
+    // 显示错误
+    function showError(message) {
+        document.getElementById('result').textContent = '错误: ' + message
+    }
+</script>
+</body>
+</html>
